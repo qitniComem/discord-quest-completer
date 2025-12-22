@@ -1,7 +1,7 @@
 # ⚡ Orion - Enterprise Discord Quest Completer
 
 > **The ultimate automated tool for completing Discord Quests effortlessly.**
-> Featuring a hybrid execution engine, traffic control system, and a stunning in-app overlay UI.
+> Featuring a hybrid execution engine, smart traffic control system, and a stunning in-app overlay UI.
 
 ![Version](https://img.shields.io/badge/version-3.5-blue.svg?style=flat-square)
 ![Status](https://img.shields.io/badge/status-working-success.svg?style=flat-square)
@@ -11,9 +11,9 @@
 
 ## 🚀 Key Features
 
-* **Hybrid Execution Engine:** Runs video tasks in parallel for speed, while safely queuing game/stream tasks serially to prevent detection and errors.
-* **Traffic Control System (Anti-429):** Intelligent request queuing prevents "Too Many Requests" API bans by respecting rate limits automatically.
-* **Invisible Overlay Bypasser:** Simulates full game processes with metadata to trick Discord's internal detection without needing to download actual games.
+* **Hybrid Execution Engine:** Runs video tasks in parallel for speed, while safely queuing game/stream tasks serially to prevent detection and crashes.
+* **Traffic Control System (Anti-429):** Intelligent request queuing prevents "Too Many Requests" API bans by respecting rate limits automatically. It ensures 100% completion success.
+* **Invisible Overlay Bypasser:** Simulates full game processes with metadata (window handle, fullscreen type) to trick Discord's internal detection without needing to download actual games.
 * **Visual Dashboard:** Injects a beautiful, draggable overlay into Discord to track progress in real-time with custom SVG icons and progress bars.
 * **Auto-Enroll & Loop:** Automatically accepts new quests, handles "Select Platform" glitches, and loops until all rewards are claimed.
 
@@ -46,11 +46,11 @@ If you prefer using your standard Discord client, follow these steps to manually
 
 ## 🛠️ Installation & Usage
 
-1.  Open **Discord** in your browser or Desktop Client.
-2.  Open the **Developer Console**:
-    * Windows/Linux: `Ctrl + Shift + I`
-    * Mac: `Cmd + Option + I`
-3.  Paste the script code into the **Console** tab and hit **Enter**.
+Due to Discord's strict Security Policy (CSP), remote loading from GitHub is blocked on the Desktop App. Please follow the method below:
+
+1.  **Copy** the entire code from the [index.js file](https://github.com/nyxxbit/discord-quest-completer/blob/main/index.js).
+2.  Open **Discord** and press `Ctrl + Shift + I` (or `F12`) to open the Console.
+3.  **Paste** the code and hit **Enter**.
 4.  Sit back! The **Orion UI** will appear in the top-right corner.
 
 > **Tip:** You can toggle the UI visibility by pressing `Shift + .` (Greater Than symbol).
@@ -61,8 +61,9 @@ You can tweak the internal settings at the top of the script code before pasting
 
 ```javascript
 const CONFIG = {
-    VIDEO_SPEED: 5,        // Seconds of progress per tick
+    VIDEO_SPEED: 5,        // Seconds of progress per tick (Safe: 5)
     GAME_CONCURRENCY: 4,   // Max simultaneous games (Recommended: 4)
+    REQUEST_DELAY: 1500,   // Delay between API calls to prevent 429 errors
     FAKE_ACTIVITY: true    // Show "Playing..." status to friends
 };
 ```
@@ -75,5 +76,5 @@ The developer (**syntt_**) is not responsible for any account suspensions or ban
 ---
 
 <div align="center">
-  <b>Developed with ❤️ by <a href="[https://discord.com/users/1419678867005767783](https://discord.com/users/1419678867005767783)">syntt_</a></b>
+  <b>Developed with ❤️ by <a href="https://discord.com/users/1419678867005767783">syntt_</a></b>
 </div>
