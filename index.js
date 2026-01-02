@@ -1,9 +1,9 @@
 (async () => {
     "use strict";
 
-    const CONFIG = {
+const CONFIG = {
         NAME: "Orion",
-        VERSION: "v3.5",
+        VERSION: "v3.6 (Enterprise)", 
         THEME: "#5865F2",
         SUCCESS: "#3BA55C",
         WARN: "#faa61a",
@@ -28,17 +28,30 @@
         CLOCK: `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/><path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>`
     };
 
+    const Storage = {
+        save(key, value) { try { window.localStorage.setItem(`orion_${key}`, JSON.stringify(value)); } catch(e){} },
+        load(key) { try { const v = window.localStorage.getItem(`orion_${key}`); return v ? JSON.parse(v) : null; } catch(e){ return null; } }
+    };
+
     const Logger = {
         root: null, tasks: new Map(),
         init() {
             const old = document.getElementById('orion-ui'); if (old) old.remove();
+            const savedPos = Storage.load('pos') || { top: '20px', left: 'auto', right: '20px' };
+            
             const style = document.createElement('style');
             style.innerHTML = `
-                @keyframes slideIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+                @keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
                 @keyframes fadeOut { from { opacity: 1; height: 70px; } to { opacity: 0; height: 0; margin: 0; padding: 0; } }
                 @keyframes stripe { 0% { background-position: 40px 0; } 100% { background-position: 0 0; } }
-                #orion-ui { position: fixed; top: 20px; right: 20px; width: 380px; background: #111214; color: #dbdee1; border-radius: 8px; font-family: 'gg sans', 'Roboto', sans-serif; z-index: 99999; box-shadow: 0 8px 32px rgba(0,0,0,0.6); border: 1px solid #2b2d31; overflow: hidden; animation: slideIn 0.3s ease; display: flex; flex-direction: column; }
-                #orion-head { padding: 14px 16px; background: #1e1f22; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2b2d31; }
+                #orion-ui { 
+                    position: fixed; top: ${savedPos.top}; left: ${savedPos.left}; right: ${savedPos.right}; width: 380px; 
+                    background: #111214; color: #dbdee1; border-radius: 8px; font-family: 'gg sans', 'Roboto', sans-serif; 
+                    z-index: 99999; box-shadow: 0 8px 32px rgba(0,0,0,0.6); border: 1px solid #2b2d31; 
+                    overflow: hidden; animation: slideIn 0.3s ease; display: flex; flex-direction: column;
+                }
+                #orion-head { padding: 14px 16px; background: #1e1f22; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2b2d31; cursor: grab; user-select: none; }
+                #orion-head:active { cursor: grabbing; background: #232428; }
                 #orion-title { font-weight: 800; font-size: 14px; color: #fff; display: flex; align-items: center; gap: 8px; letter-spacing: 0.5px; }
                 #orion-title svg { color: ${CONFIG.THEME}; }
                 #orion-body { padding: 12px; max-height: 400px; overflow-y: auto; flex-grow: 1; }
@@ -84,8 +97,38 @@
                 <div id="orion-footer">Developed by: <a href="https://discord.com/users/1419678867005767783" target="_blank" class="dev-btn">syntt_</a></div>
             `;
             document.body.appendChild(this.root);
+            
+            const head = document.getElementById('orion-head');
+            let isDragging = false, startX, startY, initialLeft, initialTop;
+            
+            head.onmousedown = e => {
+                isDragging = true;
+                startX = e.clientX; startY = e.clientY;
+                const rect = this.root.getBoundingClientRect();
+                initialLeft = rect.left; initialTop = rect.top;
+                this.root.style.right = 'auto';
+                e.preventDefault();
+            };
+            
+            document.onmousemove = e => {
+                if (!isDragging) return;
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+                this.root.style.left = `${initialLeft + dx}px`;
+                this.root.style.top = `${initialTop + dy}px`;
+            };
+            
+            document.onmouseup = () => {
+                if(isDragging) {
+                    isDragging = false;
+                    Storage.save('pos', { top: this.root.style.top, left: this.root.style.left, right: 'auto' });
+                }
+            };
+
             document.getElementById('orion-close').onclick = () => this.toggle();
             document.addEventListener('keydown', e => (e.key === '>' || (e.shiftKey && e.key === '.')) && this.toggle());
+            
+            try { if (Notification.permission === "default") Notification.requestPermission(); } catch(e){}
         },
         toggle() { this.root.style.display = this.root.style.display === 'none' ? 'flex' : 'none'; },
         updateTask(id, data) {
@@ -191,14 +234,18 @@
         },
         dispatch(added, removed) { Mods.Dispatcher.dispatch({ type: CONST.EVT.GAME, added: added ? [added] : [], removed: removed ? [removed] : [], games: Mods.RunStore.getRunningGames() }); },
         rpc(g) { 
-            Mods.Dispatcher.dispatch({ type: CONST.EVT.RPC, socketId: null, pid: 9999, activity: g ? { application_id: g.id, name: g.name, type: 0, details: "Orion Helper", state: "Completing Quests", timestamps: { start: g.start }, assets: { large_image: g.id } } : null });
+            if (Mods.Dispatcher) Mods.Dispatcher.dispatch({ type: CONST.EVT.RPC, socketId: null, pid: 9999, activity: g ? { application_id: g.id, name: g.name, type: 0, details: "Orion Helper", state: "Completing Quests", timestamps: { start: g.start }, assets: { large_image: g.id } } : null });
         },
-        clean() { this.games = []; this.toggle(false); this.rpc(null); }
+        clean() { 
+            this.games = []; this.toggle(false); 
+            if(this.rpc) this.rpc(null); 
+        }
     };
 
     const Tasks = {
         async VIDEO(q, t, s) {
             let cur = s.progress?.[t.type]?.value ?? 0;
+            // Key Fix: Use q.id (Quest ID) for UI updates
             Logger.updateTask(q.id, { name: t.name, type: "VIDEO", cur, max: t.target, status: "RUNNING" });
             
             while (cur < t.target) {
@@ -218,7 +265,8 @@
             return new Promise(resolve => {
                 const pid = rnd(10000, 50000);
                 const game = { 
-                    id: t.id, name: t.name, pid: pid, pidPath: [pid],
+                    // Key Fix: Fake Game uses Application ID (t.appId) to trick Discord
+                    id: t.appId, name: t.name, pid: pid, pidPath: [pid],
                     start: Date.now(), processName: "game",
                     exeName: "game.exe", exePath: "c:/program files/game/game.exe", 
                     cmdLine: "C:\\Program Files\\Game\\game.exe",
@@ -229,13 +277,15 @@
                 
                 if (type === "STREAM") {
                     const real = Mods.StreamStore.getStreamerActiveStreamMetadata;
-                    Mods.StreamStore.getStreamerActiveStreamMetadata = () => ({ id: t.id, pid, sourceName: "Orion" });
+                    // Fix: Use t.appId for Stream ID too
+                    Mods.StreamStore.getStreamerActiveStreamMetadata = () => ({ id: t.appId, pid, sourceName: "Orion" });
                     var cleanupHook = () => Mods.StreamStore.getStreamerActiveStreamMetadata = real;
                 } else {
                     Patcher.add(game);
                     var cleanupHook = () => Patcher.remove(game);
                 }
 
+                // Key Fix: Use q.id (Quest ID) for UI
                 Logger.updateTask(q.id, { name: t.name, type, cur: 0, max: t.target, status: "RUNNING" });
                 Logger.log(`[${type}] Starting process: ${t.name}`, 'debug');
 
@@ -285,6 +335,7 @@
         finish(q, t) {
             Logger.updateTask(q.id, { name: t.name, type: t.type, cur: t.target, max: t.target, status: "COMPLETED" });
             Logger.log(`Completed: ${t.name}`, 'success');
+            try { if(Notification.permission === "granted") new Notification("Orion: Quest Completed", { body: t.name, icon: "https://cdn.discordapp.com/emojis/1120042457007792168.webp" }); } catch(e){}
             setTimeout(() => Logger.removeTask(q.id), CONFIG.REMOVE_DELAY);
         }
     };
@@ -358,7 +409,17 @@
                 if (keyName && !target) target = cfg.tasks[keyName].target;
                 if (!type) return Logger.log(`Unknown task type: ${q.config.messages.questName}`, 'warn');
 
-                const tInfo = { id: q.config.application.id, name: q.config.messages.questName, target: target, type: type, originalKey: keyName };
+                // Pass BOTH ID Types:
+                // id: Quest ID (for UI uniqueness)
+                // appId: Application ID (for Fake Process)
+                const tInfo = { 
+                    id: q.id, 
+                    appId: q.config.application.id, 
+                    name: q.config.messages.questName, 
+                    target: target, 
+                    type: type 
+                };
+                
                 Logger.updateTask(tInfo.id, { name: tInfo.name, type: tInfo.type, cur: 0, max: tInfo.target, status: "QUEUE" });
 
                 if (type === "WATCH_VIDEO") queue.videos.push(Tasks.VIDEO(q, tInfo, q.userStatus));
