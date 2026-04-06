@@ -1,9 +1,10 @@
 <div align="center">
+
 # Orion
 
-**Auto-complete every Discord Quest in seconds** &mdash; v4.2
+**Auto-complete every Discord Quest in seconds** &mdash; v4.3
 
-[![Version](https://img.shields.io/badge/v4.2-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://github.com/nyxxbit/discord-quest-completer)
+[![Version](https://img.shields.io/badge/v4.3-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://github.com/nyxxbit/discord-quest-completer)
 [![Stars](https://img.shields.io/github/stars/nyxxbit/discord-quest-completer?style=for-the-badge&color=faa61a)](https://github.com/nyxxbit/discord-quest-completer/stargazers)
 [![License](https://img.shields.io/badge/MIT-green?style=for-the-badge)](LICENSE)
 
@@ -146,6 +147,14 @@ Unlike other scripts that break on every Discord update, Orion finds stores by t
 ---
 
 ## Changelog
+
+### v4.3
+- **GO TO QUESTS button** &mdash; Achievement quests in `RUNNING` state now show an `ACTION REQUIRED` status with a navigation button that uses Discord's native router (`transitionTo('/quest-home')`) to jump straight to the quest page
+- **Resilient router detection** &mdash; New `findRouter()` locates Discord's minified `transitionTo` by source signature (`"transitionTo -"`), no hardcoded paths
+- **Standardized log tags** &mdash; Unified prefixes across the codebase (`[System]`, `[Network]`, `[Task]`, `[Cycle]`, `[Enroll]`, `[Claim]`) for consistent, readable output
+- **Cleaner UI logs** &mdash; `debug` level messages now go to DevTools only and no longer spam the in-app dashboard
+- **Achievement progress display** &mdash; Progress text now omits the `s` (seconds) suffix for `ACHIEVEMENT` quests since their target is a count, not a duration
+- **Fixed progress text updates** &mdash; Restored missing `progress-text` class so live progress numbers update correctly on task cards
 
 ### v4.2
 - **Native UI Claiming:** Added in-UI claiming via Claim Reward button.
