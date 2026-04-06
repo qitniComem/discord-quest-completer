@@ -2,6 +2,20 @@
 // Run locally with: npx eslint@9 index.js
 export default [
     {
+        // The Vencord userplugin is TypeScript and is built by Vencord's
+        // own toolchain — not by this config. Ignore it here.
+        ignores: ["vencord-plugin/**"],
+    },
+    {
+        // ESM config files (this very file)
+        files: ["**/*.mjs"],
+        languageOptions: {
+            ecmaVersion: "latest",
+            sourceType: "module",
+        },
+    },
+    {
+        files: ["index.js"],
         languageOptions: {
             ecmaVersion: "latest",
             sourceType: "script",
