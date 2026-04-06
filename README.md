@@ -31,6 +31,9 @@ Completes all Discord Quests automatically &mdash; game, video, stream, activity
 
 ## Quick start
 
+> [!IMPORTANT]
+> **Discord Desktop client only.** Orion hooks into Discord's internal webpack stores, which are only exposed in the desktop app (Stable, PTB, or Canary). It will **not** work in browser Discord, mobile Discord, or any web-based client &mdash; even with DevTools or script-injection extensions like Kiwi Browser. `GAME` and `STREAM` quests in particular are impossible outside the desktop client.
+
 **1.** Open Discord ([Canary](https://canary.discord.com/download) recommended &mdash; console enabled by default)
 
 **2.** Press `Ctrl + Shift + I` &rarr; Console tab
