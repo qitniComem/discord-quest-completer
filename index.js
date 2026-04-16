@@ -5,7 +5,7 @@
 
     const CONFIG = {
         NAME: "Orion",
-        VERSION: "v4.5 (Enterprise)",
+        VERSION: "v4.5.1 (Enterprise)",
         THEME: "#5865F2",             // discord blurple
         SUCCESS: "#3BA55C",
         WARN: "#faa61a",
@@ -1219,7 +1219,13 @@
                 btn.classList.toggle('disabled', n === 0);
             };
 
-            $$('input[data-qid]').forEach(cb => cb.addEventListener('change', syncStartBtn));
+            const syncToggleLabel = () => {
+                const visible = $$('.quest-pick:not(.hidden)');
+                const allChecked = visible.length > 0 && visible.every(c => c.querySelector('input').checked);
+                $('#orion-toggle-all').textContent = allChecked ? 'DESELECT ALL' : 'SELECT ALL';
+            };
+
+            $$('input[data-qid]').forEach(cb => cb.addEventListener('change', () => { syncStartBtn(); syncToggleLabel(); }));
 
             // reward filter toggles
             const filters = Object.fromEntries(rewardTypes.map(rt => [rt, true]));
@@ -1233,16 +1239,16 @@
                         card.querySelector('input').checked = filters[rt];
                     });
                     syncStartBtn();
+                    syncToggleLabel();
                 });
             });
 
-            // select/deselect all
-            let allOn = true;
+            // select/deselect all (only affects visible quests, never hides/shows cards)
             $('#orion-toggle-all').addEventListener('click', () => {
-                allOn = !allOn;
-                $$('.quest-pick').forEach(c => { c.classList.toggle('hidden', !allOn); c.querySelector('input').checked = allOn; });
-                $$('.reward-filter').forEach(b => { filters[Number(b.dataset.rt)] = allOn; b.classList.toggle('off', !allOn); });
-                $('#orion-toggle-all').textContent = allOn ? 'DESELECT ALL' : 'SELECT ALL';
+                const visible = $$('.quest-pick:not(.hidden)');
+                const allChecked = visible.length > 0 && visible.every(c => c.querySelector('input').checked);
+                visible.forEach(c => { c.querySelector('input').checked = !allChecked; });
+                syncToggleLabel();
                 syncStartBtn();
             });
 
