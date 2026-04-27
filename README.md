@@ -18,6 +18,13 @@ Completes all Discord Quests automatically &mdash; game, video, stream, activity
 
 ---
 
+> [!WARNING]
+> **Discord Stable is currently broken** (late April 2026). A new Stable build changed the webpack runtime, breaking `loadModules()` with `Cannot read properties of undefined (reading 'c')`.
+>
+> **Workaround:** use [Discord Canary](https://canary.discord.com/download) until a fix ships. Tracked in [#20](https://github.com/nyxxbit/discord-quest-completer/issues/20) &mdash; community PRs welcome.
+
+---
+
 ## Why Orion?
 
 - **Completes ALL quest types** &mdash; Video, Game, Stream, Activity, and the new Achievement quests
